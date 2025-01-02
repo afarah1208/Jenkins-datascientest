@@ -69,7 +69,7 @@ spec:
       - name: nginx
         image: {{ .Values.nginx.image.repository }}:{{ .Values.nginx.image.tag }}
         ports:
-        - containerPort: 8080
+        - containerPort: 8081
         volumeMounts:
         - name: nginx-config
           mountPath: /etc/nginx/conf.d

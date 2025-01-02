@@ -39,5 +39,5 @@ nginx:
   image:
     repository: nginx
     tag: latest
-  nginxPort: 8080
+  nginxPort: 8081
 
