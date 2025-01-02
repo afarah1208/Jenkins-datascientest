@@ -16,8 +16,8 @@ pipeline {
             steps {
                 script {
                     sh '''
-                        docker build -t $DOCKER_ID/$DOCKER_IMAGE_MOVIE_SERVICE:$DOCKER_TAG /home/ubuntu/jenkins_devops_exam/movie-service/
-                        docker build -t $DOCKER_ID/$DOCKER_IMAGE_CAST_SERVICE:$DOCKER_TAG /home/ubuntu/jenkins_devops_exam/cast-service/
+                        docker build -t $DOCKER_ID/$DOCKER_IMAGE_MOVIE_SERVICE:$DOCKER_TAG ./movie-service/
+                        docker build -t $DOCKER_ID/$DOCKER_IMAGE_CAST_SERVICE:$DOCKER_TAG ./cast-service/
                         sleep 6
                     '''
                 }
