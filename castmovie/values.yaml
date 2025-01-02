@@ -1,0 +1,35 @@
+movieService:
+  image: "afarah1208/movie-service:latest"
+  servicePort: 8001
+  environment:
+    DATABASE_URI: postgresql://movie_db_username:movie_db_password@movie_db/movie_db_dev
+    CAST_SERVICE_HOST_URL: http://cast_service:8000/api/v1/casts/
+
+movieDb:
+  image:
+    repository: postgres
+    tag: 12.1-alpine
+  postgresUser: movie_db_username
+  postgresPassword: movie_db_password
+  postgresDatabase: movie_db_dev
+
+castService:
+  image: "afarah1208/movie-service:latest"
+  servicePort: 8002
+  environment:
+    DATABASE_URI: postgresql://cast_db_username:cast_db_password@cast_db/cast_db_dev
+
+castDb:
+  image:
+    repository: postgres
+    tag: 12.1-alpine
+  postgresUser: cast_db_username
+  postgresPassword: cast_db_password
+  postgresDatabase: cast_db_dev
+
+nginx:
+  image:
+    repository: nginx
+    tag: latest
+  nginxPort: 8080
+

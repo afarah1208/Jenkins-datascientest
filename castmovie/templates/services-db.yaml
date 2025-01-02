@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: movie-db
+spec:
+  selector:
+    app: movie-service
+  ports:
+  - protocol: TCP
+    port: 5432
+    targetPort: 5432
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: cast-db
+spec:
+  selector:
+    app: cast-service
+  ports:
+  - protocol: TCP
+    port: 5432
+    targetPort: 5432
+
