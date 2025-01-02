@@ -19,13 +19,15 @@ spec:
         - containerPort: 8000
         env:
         - name: DATABASE_URI
-          value: {{ .Values.movieService.environment.DATABASE_URI }}
-        - name: CAST_SERVICE_HOST_URL
-          value: {{ .Values.movieService.environment.CAST_SERVICE_HOST_URL }}
+          value: postgresql://{{ .Values.movieDb.postgresUser }}:$(POSTGRES_PASSWORD)@movie-db/{{ .Values.movieDb.postgresDatabase }}
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgre-rootpass
+              key: password
         command: ["uvicorn", "app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
 
 ---
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -47,8 +49,14 @@ spec:
         - containerPort: 8000
         env:
         - name: DATABASE_URI
-          value: {{ .Values.castService.environment.DATABASE_URI }}
+          value: postgresql://{{ .Values.castDb.postgresUser }}:$(POSTGRES_PASSWORD)@cast-db/{{ .Values.castDb.postgresDatabase }}
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgre-rootpass
+              key: password
         command: ["uvicorn", "app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
+
 ---
 
 apiVersion: apps/v1

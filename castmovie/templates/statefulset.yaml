@@ -22,7 +22,10 @@ spec:
         - name: POSTGRES_USER
           value: {{ .Values.movieDb.postgresUser }}
         - name: POSTGRES_PASSWORD
-          value: {{ .Values.movieDb.postgresPassword }}
+          valueFrom:
+            secretKeyRef:
+              name: postgre-rootpass
+              key: password
         - name: POSTGRES_DB
           value: {{ .Values.movieDb.postgresDatabase }}
         volumeMounts:
@@ -36,6 +39,7 @@ spec:
       resources:
         requests:
           storage: 1Gi
+
 
 ---
 
@@ -63,7 +67,10 @@ spec:
         - name: POSTGRES_USER
           value: {{ .Values.castDb.postgresUser }}
         - name: POSTGRES_PASSWORD
-          value: {{ .Values.castDb.postgresPassword }}
+          valueFrom:
+            secretKeyRef:
+              name: postgre-rootpass
+              key: password
         - name: POSTGRES_DB
           value: {{ .Values.castDb.postgresDatabase }}
         volumeMounts:
