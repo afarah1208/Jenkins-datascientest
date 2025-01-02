@@ -16,23 +16,17 @@ spec:
     spec:
       containers:
       - name: movie-service
-        image: {{ .Values.movieService.image }}
+        image: afarah1208/movie-service:latest # Image mise à jour
         ports:
         - containerPort: 8000
         env:
         - name: DATABASE_URI
-          value: postgresql://{{ .Values.movieDb.postgresUser }}:{{ .Values.movieDb.postgresPassword }}@movie-db/{{ .Values.movieDb.postgresDatabase }}
+          value: postgresql://movie_db_username:movie_db_password@movie-db/movie_db_dev
         - name: CAST_SERVICE_HOST_URL
           value: http://cast-service:8000/api/v1/casts/
-        - name: POSTGRES_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: postgre-rootpass
-              key: password
-        command: ["uvicorn", "app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
+        command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"] # Suppression de --reload
 
----
-apiVersion: apps/v1
+---apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cast-service
@@ -50,18 +44,13 @@ spec:
     spec:
       containers:
       - name: cast-service
-        image: {{ .Values.castService.image }}
+        image: afarah1208/movie-service:latest # Vérifie si l'image est correcte pour Cast
         ports:
         - containerPort: 8000
         env:
         - name: DATABASE_URI
-          value: postgresql://{{ .Values.castDb.postgresUser }}:{{ .Values.castDb.postgresPassword }}@cast-db/{{ .Values.castDb.postgresDatabase }}
-        - name: POSTGRES_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: postgre-rootpass
-              key: password
-        command: ["uvicorn", "app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
+          value: postgresql://cast_db_username:cast_db_password@cast-db/cast_db_dev
+        command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"] # Suppression de --reload
 
 ---
 

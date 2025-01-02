@@ -7,7 +7,7 @@ spec:
     app: movie-service
   ports:
   - protocol: TCP
-    port: 8000
+    port: 8001 # Port exposé harmonisé
     targetPort: 8000
 
 ---
@@ -21,7 +21,7 @@ spec:
     app: cast-service
   ports:
   - protocol: TCP
-    port: 8000
+    port: 8002 # Port exposé harmonisé
     targetPort: 8000
 
 ---
@@ -38,5 +38,3 @@ spec:
   - protocol: TCP
     port: 8081
     targetPort: 8080
-    
-

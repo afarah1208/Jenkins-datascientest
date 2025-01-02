@@ -4,7 +4,7 @@ metadata:
   name: movie-db
 spec:
   selector:
-    app: movie-service
+    app: movie-db
   ports:
   - protocol: TCP
     port: 5432
@@ -18,9 +18,8 @@ metadata:
   name: cast-db
 spec:
   selector:
-    app: cast-service
+    app: cast-db
   ports:
   - protocol: TCP
     port: 5432
     targetPort: 5432
-

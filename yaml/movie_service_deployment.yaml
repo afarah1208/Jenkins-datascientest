@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: movie-service
+  namespace: test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: movie-service
+  template:
+    metadata:
+      labels:
+        app: movie-service
+    spec:
+      containers:
+      - name: movie-service
+        image: afarah1208/movie-service:latest
+        command: ["uvicorn", "app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
+        env:
+        - name: DATABASE_URI
+          value: "postgresql://movie_db_username:movie_db_password@movie-db.movie-db.svc.cluster.local/movie_db_dev"
+        ports:
+        - containerPort: 8000
