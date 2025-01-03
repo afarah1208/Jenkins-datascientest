@@ -25,11 +25,11 @@ cast_service:
   volumes:
     - name: cast-data
       persistentVolumeClaim:
-        claimName: cast-pvc
+        claimName: cast-db-pvc
   configmap: cast-configmap
   
   pvc:
-    name: cast-pvc
+    name: cast-db-pvc
     accessMode: ReadWriteOnce
     storage: 100Mi
     storageClassName: local-path
@@ -58,11 +58,11 @@ cast_db:
   volumes:
     - name: postgres-data-cast
       persistentVolumeClaim:
-        claimName: postgres-cast-pvc
+        claimName: cast-db-pvc
   secret: postgres-cast
 
   pvc:
-    name: postgres-cast-pvc
+    name: cast-db-pvc
     accessMode: ReadWriteOnce
     storage: 5Gi
     storageClassName: local-path
@@ -93,7 +93,7 @@ movie_service:
   volumes:
     - name: movie-data
       persistentVolumeClaim:
-        claimName: movie-pvc
+        claimName: movie-db-pvc
   configmap: movie-configmap
 
   pvc:
@@ -125,11 +125,11 @@ movie_db:
   volumes:
     - name: postgres-data-movie
       persistentVolumeClaim:
-        claimName: postgres-movie-pvc
+        claimName: movie-db-pvc
   secret: postgres-movie
 
   pvc:
-    name: postgres-movie-pvc
+    name: movie-db-pvc
     accessMode: ReadWriteOnce
     storage: 5Gi
     storageClassName: local-path
