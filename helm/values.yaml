@@ -1,5 +1,5 @@
-namespace: qa
-
+namespace: dev
+releaseVersion : latest
 cast_service:
   image:
     repository: afarah1208/cast-service:latest
