@@ -14,9 +14,9 @@ spec:
         app: {{ .Values.movie_service.metadata.label }}
     spec:
       initContainers:
-        - name: wait-for-cast-db
+        - name: wait-for-movie-db
           image: busybox
-          command: ['sh', '-c', 'until nc -z cast-db 5433; do echo waiting for cast-db; sleep 5; done']
+          command: ['sh', '-c', 'until nc -z movie-db 5432; do echo waiting for movie-db; sleep 5; done']
       containers:
         - name: {{ .Values.movie_service.metadata.label }}
           image: {{ .Values.movie_service.image.repository }}

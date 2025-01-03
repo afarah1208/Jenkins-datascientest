@@ -16,7 +16,7 @@ spec:
       containers:
         - env:
             - name: POSTGRES_DB
-              value: movie_db_{{ .Values.namespace }}
+              value: {{ .Values.movie_db.env.POSTGRES_DB }}
             - name: {{ .Values.movie_db.env.ENV_DB_PASSWORD }}
               valueFrom: 
                 secretKeyRef: 
