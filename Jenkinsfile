@@ -83,34 +83,126 @@ pipeline {
             }
         }
 
-        // Déploiement dans dev, qa, staging, prod
-        stage('Deployment in dev') {
-            steps {
-                deployWithHelm('dev')
-            }
+stage('Deploiement en dev'){
+        environment
+        {
+        KUBECONFIG = credentials("config") // we retrieve  kubeconfig from secret file called config saved on jenkins
         }
-
-        stage('Deployment in qa') {
             steps {
-                deployWithHelm('qa')
-            }
-        }
+                script {
+                sh '''
+                rm -Rf .kube
+                mkdir .kube
+                ls
+                cat $KUBECONFIG > .kube/config
+                cp fastapi/values.yaml values.yml
+                cat values.yml
+                sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
+                helm upgrade --install moviecast-helm ./helm \
+        --namespace dev --create-namespace \
+        --values ./helm/values.yaml \
+        --set namespace=dev \
+        --set cast_service.image=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE} \
+        --set cast_service.imageTag=${DOCKER_TAG} \
+        --set movie_service.image=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE} \
+        --set movie_service.imageTag=${DOCKER_TAG}
 
-        stage('Deployment in staging') {
-            steps {
-                deployWithHelm('staging')
-            }
-        }
+    echo "Waiting for Nginx service in dev to be ready..."
+    sleep 30
 
-        stage('Deployment in prod') {
-            steps {
-                timeout(time: 15, unit: "MINUTES") {
-                    input message: 'Do you want to deploy in production?', ok: 'Yes'
+    NODE_PORT=\$(kubectl get svc nginx-service -n dev -o jsonpath='{.spec.ports[0].nodePort}')
+    NODE_IP=\$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}')
+
+    echo "Nginx is accessible on: http://\$NODE_IP:\$NODE_PORT"
+    echo "Movies API endpoint: http://\$NODE_IP:\$NODE_PORT/api/v1/movies/"
+    echo "Casts API endpoint: http://\$NODE_IP:\$NODE_PORT/api/v1/casts/"'''
                 }
-                deployWithHelm('prod')
             }
+
         }
-    }
+stage('Deploiement en staging'){
+        environment
+        {
+        KUBECONFIG = credentials("config") // we retrieve  kubeconfig from secret file called config saved on jenkins
+        }
+            steps {
+                script {
+                sh '''
+                rm -Rf .kube
+                mkdir .kube
+                ls
+                cat $KUBECONFIG > .kube/config
+                cp fastapi/values.yaml values.yml
+                cat values.yml
+                sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
+                helm upgrade --install moviecast-helm ./helm \
+        --namespace staging --create-namespace \
+        --values ./helm/values.yaml \
+        --set namespace=staging \
+        --set cast_service.image=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE} \
+        --set cast_service.imageTag=${DOCKER_TAG} \
+        --set movie_service.image=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE} \
+        --set movie_service.imageTag=${DOCKER_TAG}
+
+    echo "Waiting for Nginx service in staging to be ready..."
+    sleep 30
+
+    NODE_PORT=\$(kubectl get svc nginx-service -n staging -o jsonpath='{.spec.ports[0].nodePort}')
+    NODE_IP=\$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}')
+
+    echo "Nginx is accessible on: http://\$NODE_IP:\$NODE_PORT"
+    echo "Movies API endpoint: http://\$NODE_IP:\$NODE_PORT/api/v1/movies/"
+    echo "Casts API endpoint: http://\$NODE_IP:\$NODE_PORT/api/v1/casts/" '''
+                }
+            }
+
+        }
+  stage('Deploiement en prod'){
+        environment
+        {
+        KUBECONFIG = credentials("config") // we retrieve  kubeconfig from secret file called config saved on jenkins
+        }
+            steps {
+            // Create an Approval Button with a timeout of 15minutes.
+            // this require a manuel validation in order to deploy on production environment
+                    timeout(time: 15, unit: "MINUTES") {
+                        input message: 'Do you want to deploy in production ?', ok: 'Yes'
+                    }
+
+                script {
+                sh '''
+                rm -Rf .kube
+                mkdir .kube
+                ls
+                cat $KUBECONFIG > .kube/config
+                cp fastapi/values.yaml values.yml
+                cat values.yml
+                sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
+                helm upgrade --install moviecast-helm ./helm \
+        --namespace prod --create-namespace \
+        --values ./helm/values.yaml \
+        --set namespace=prod \
+        --set cast_service.image=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE} \
+        --set cast_service.imageTag=${DOCKER_TAG} \
+        --set movie_service.image=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE} \
+        --set movie_service.imageTag=${DOCKER_TAG}
+
+    echo "Waiting for Nginx service in prod to be ready..."
+    sleep 30
+
+    NODE_PORT=\$(kubectl get svc nginx-service -n prod -o jsonpath='{.spec.ports[0].nodePort}')
+    NODE_IP=\$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}')
+
+    echo "Nginx is accessible on: http://\$NODE_IP:\$NODE_PORT"
+    echo "Movies API endpoint: http://\$NODE_IP:\$NODE_PORT/api/v1/movies/"
+    echo "Casts API endpoint: http://\$NODE_IP:\$NODE_PORT/api/v1/casts/"
+                '''
+                }
+            }
+
+        }
+
+}
 }
 def deployWithHelm(env) {
     environment {
