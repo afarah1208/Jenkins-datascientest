@@ -1,4 +1,4 @@
-namespace: dev
+namespace: qa
 
 cast_service:
   image:
@@ -44,7 +44,6 @@ cast_db:
   spec:
     replicaCount: 1
   env:
-    ENV_DB: cast_db_dev
     ENV_DB_USER: POSTGRES_USER
     ENV_DB_PASSWORD: POSTGRES_PASSWORD 
     
@@ -112,7 +111,6 @@ movie_db:
   spec:
     replicaCount: 1
   env:
-    ENV_DB: movie_db_dev
     ENV_DB_USER: POSTGRES_USER
     ENV_DB_PASSWORD: POSTGRES_PASSWORD
 
