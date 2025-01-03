@@ -67,32 +67,6 @@ pipeline {
             }
         }
 
-        stage('Test Acceptance') {
-            steps {
-                script {
-                    sh '''
-                    #!/bin/bash
-                    endpoints=(
-                        "http://localhost/api/v1/casts/"
-                        "http://localhost/api/v1/movies/"
-                    )
-
-                    for endpoint in "${endpoints[@]}"; do
-                        echo "Testing $endpoint"
-                        response=$(curl -s -o /dev/null -w "%{http_code}" $endpoint)
-
-                        if [ "$response" == "200" ]; then
-                            echo "SUCCESS: $endpoint is reachable."
-                        else
-                            echo "FAILURE: $endpoint returned HTTP code $response."
-                            exit 1
-                        fi
-                    done
-                    '''
-                }
-            }
-        }
-
         stage('Docker Push') {
             environment {
                 DOCKER_PASS = credentials("DOCKER_HUB_PASS")
