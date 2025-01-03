@@ -91,19 +91,35 @@ stage('Deploiement en dev'){
             steps {
                 script {
                 sh '''
+                #!/bin/bash
                 rm -Rf .kube
                 mkdir .kube
                 ls
                 cat $KUBECONFIG > .kube/config
                 cp helm/values.yaml values.yml
                 cat values.yml
-                sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
-                helm upgrade --install moviecast-helm ./helm \
-        --namespace dev --create-namespace \
-        --values ./helm/values.yaml \
-        --set namespace=dev \
-        --set cast_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE}:${DOCKER_TAG} \
-        --set movie_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE}:${DOCKER_TAG}
+                RELEASE_NAME="moviecast-helm"
+                    NAMESPACE="prod"
+
+                    helm status $RELEASE_NAME -n $NAMESPACE > /dev/null 2>&1
+
+                    if [ $? -eq 0 ]; then
+                        echo "Upgrading existing release $RELEASE_NAME in namespace $NAMESPACE..."
+                        helm upgrade $RELEASE_NAME ./helm \
+                            --namespace $NAMESPACE \
+                            --values ./helm/values.yaml \
+                            --set namespace=$NAMESPACE \
+                            --set cast_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE}:${DOCKER_TAG} \
+                            --set movie_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE}:${DOCKER_TAG}
+                    else
+                        echo "Installing new release $RELEASE_NAME in namespace $NAMESPACE..."
+                        helm install $RELEASE_NAME ./helm \
+                            --namespace $NAMESPACE --create-namespace \
+                            --values ./helm/values.yaml \
+                            --set namespace=$NAMESPACE \
+                            --set cast_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE}:${DOCKER_TAG} \
+                            --set movie_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE}:${DOCKER_TAG}
+                    fi
 
     echo "Waiting for Nginx service in dev to be ready..."
     sleep 15
