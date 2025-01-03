@@ -100,36 +100,30 @@ stage('Deploiement en dev'){
                 cat values.yml
                 sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
                 RELEASE_NAME="moviecast-helm"
-                    NAMESPACE="dev"
+                NAMESPACE="dev"
+                helm upgrade $RELEASE_NAME ./helm \
+                    --namespace $NAMESPACE \
+                    --values ./helm/values.yaml \
+                    --set namespace=$NAMESPACE \
+                    --set cast_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE}:${DOCKER_TAG} \
+                    --set movie_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE}:${DOCKER_TAG} \
+                    --set releaseVersion=${DOCKER_TAG} \
+                || \
+                helm install $RELEASE_NAME ./helm \
+                    --namespace $NAMESPACE --create-namespace \
+                    --values ./helm/values.yaml \
+                    --set namespace=$NAMESPACE \
+                    --set cast_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE}:${DOCKER_TAG} \
+                    --set movie_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE}:${DOCKER_TAG} \
+                    --set releaseVersion=${DOCKER_TAG}
+                echo "Waiting for Nginx service in $NAMESPACE to be ready..."
+                sleep 15
 
-                    helm status $RELEASE_NAME -n $NAMESPACE > /dev/null 2>&1
-
-                    if [ $? -eq 0 ]; then
-                        echo "Upgrading existing release $RELEASE_NAME in namespace $NAMESPACE..."
-                        helm upgrade $RELEASE_NAME ./helm \
-                            --namespace $NAMESPACE \
-                            --values ./helm/values.yaml \
-                            --set namespace=$NAMESPACE \
-                            --set cast_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE}:${DOCKER_TAG} \
-                            --set movie_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE}:${DOCKER_TAG}
-                    else
-                        echo "Installing new release $RELEASE_NAME in namespace $NAMESPACE..."
-                        helm install $RELEASE_NAME ./helm \
-                            --namespace $NAMESPACE --create-namespace \
-                            --values ./helm/values.yaml \
-                            --set namespace=$NAMESPACE \
-                            --set cast_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE}:${DOCKER_TAG} \
-                            --set movie_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE}:${DOCKER_TAG}
-                    fi
-
-    echo "Waiting for Nginx service in dev to be ready..."
-    sleep 15
-
-    IP=\$(curl ifconfig.me)
-    NODE_PORT=\$(kubectl get svc nginx -n dev -o jsonpath='{.spec.ports[0].nodePort}')
-    echo "Movies API endpoint: http://\$IP:\$NODE_PORT/api/v1/movies/docs"
-    echo "Casts API endpoint: http://\$IP:\$NODE_PORT/api/v1/casts/docs"
-    '''
+                IP=\$(curl ifconfig.me)
+                NODE_PORT=\$(kubectl get svc nginx -n $NAMESPACE -o jsonpath='{.spec.ports[0].nodePort}')
+                echo "Movies API endpoint: http://\$IP:\$NODE_PORT/api/v1/movies/docs"
+                echo "Casts API endpoint: http://\$IP:\$NODE_PORT/api/v1/casts/docs"
+                '''
                 }
             }
 
@@ -142,6 +136,7 @@ stage('Deploiement en qa'){
             steps {
                 script {
                 sh '''
+                #!/bin/bash
                 rm -Rf .kube
                 mkdir .kube
                 ls
@@ -149,20 +144,31 @@ stage('Deploiement en qa'){
                 cp helm/values.yaml values.yml
                 cat values.yml
                 sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
-                helm upgrade --install moviecast-helm ./helm \
-        --namespace qa --create-namespace \
-        --values ./helm/values.yaml \
-        --set namespace=qa \
-        --set cast_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE}:${DOCKER_TAG} \
-        --set movie_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE}:${DOCKER_TAG}
+                RELEASE_NAME="moviecast-helm"
+                NAMESPACE="qa"
+                helm upgrade $RELEASE_NAME ./helm \
+                    --namespace $NAMESPACE \
+                    --values ./helm/values.yaml \
+                    --set namespace=$NAMESPACE \
+                    --set cast_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE}:${DOCKER_TAG} \
+                    --set movie_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE}:${DOCKER_TAG} \
+                    --set releaseVersion=${DOCKER_TAG} \
+                || \
+                helm install $RELEASE_NAME ./helm \
+                    --namespace $NAMESPACE --create-namespace \
+                    --values ./helm/values.yaml \
+                    --set namespace=$NAMESPACE \
+                    --set cast_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE}:${DOCKER_TAG} \
+                    --set movie_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE}:${DOCKER_TAG} \
+                    --set releaseVersion=${DOCKER_TAG}
+                echo "Waiting for Nginx service in $NAMESPACE to be ready..."
+                sleep 15
 
-    echo "Waiting for Nginx service in qa to be ready..."
-        sleep 15
-
-    NODE_PORT=\$(kubectl get svc nginx -n qa -o jsonpath='{.spec.ports[0].nodePort}')
-    IP=\$(curl ifconfig.me)
-    echo "Movies API endpoint: http://\$IP:\$NODE_PORT/api/v1/movies/docs"
-    echo "Casts API endpoint: http://\$IP:\$NODE_PORT/api/v1/casts/docs"'''
+                IP=\$(curl ifconfig.me)
+                NODE_PORT=\$(kubectl get svc nginx -n $NAMESPACE -o jsonpath='{.spec.ports[0].nodePort}')
+                echo "Movies API endpoint: http://\$IP:\$NODE_PORT/api/v1/movies/docs"
+                echo "Casts API endpoint: http://\$IP:\$NODE_PORT/api/v1/casts/docs"
+                '''
                 }
             }
 
@@ -175,6 +181,7 @@ stage('Deploiement en staging'){
             steps {
                 script {
                 sh '''
+                 #!/bin/bash
                 rm -Rf .kube
                 mkdir .kube
                 ls
@@ -182,20 +189,31 @@ stage('Deploiement en staging'){
                 cp helm/values.yaml values.yml
                 cat values.yml
                 sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
-                helm upgrade --install moviecast-helm ./helm \
-        --namespace staging --create-namespace \
-        --values ./helm/values.yaml \
-        --set namespace=staging \
-        --set cast_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE}:${DOCKER_TAG} \
-        --set movie_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE}:${DOCKER_TAG}
+                RELEASE_NAME="moviecast-helm"
+                NAMESPACE="staging"
+                helm upgrade $RELEASE_NAME ./helm \
+                    --namespace $NAMESPACE \
+                    --values ./helm/values.yaml \
+                    --set namespace=$NAMESPACE \
+                    --set cast_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE}:${DOCKER_TAG} \
+                    --set movie_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE}:${DOCKER_TAG} \
+                    --set releaseVersion=${DOCKER_TAG} \
+                || \
+                helm install $RELEASE_NAME ./helm \
+                    --namespace $NAMESPACE --create-namespace \
+                    --values ./helm/values.yaml \
+                    --set namespace=$NAMESPACE \
+                    --set cast_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE}:${DOCKER_TAG} \
+                    --set movie_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE}:${DOCKER_TAG} \
+                    --set releaseVersion=${DOCKER_TAG}
+                echo "Waiting for Nginx service in $NAMESPACE to be ready..."
+                sleep 15
 
-    echo "Waiting for Nginx service in staging to be ready..."
-        sleep 15
-
-    IP=\$(curl ifconfig.me)
-    NODE_PORT=\$(kubectl get svc nginx -n staging -o jsonpath='{.spec.ports[0].nodePort}')
-    echo "Movies API endpoint: http://\$IP:\$NODE_PORT/api/v1/movies/docs"
-    echo "Casts API endpoint: http://\$IP:\$NODE_PORT/api/v1/casts/docs"'''
+                IP=\$(curl ifconfig.me)
+                NODE_PORT=\$(kubectl get svc nginx -n $NAMESPACE -o jsonpath='{.spec.ports[0].nodePort}')
+                echo "Movies API endpoint: http://\$IP:\$NODE_PORT/api/v1/movies/docs"
+                echo "Casts API endpoint: http://\$IP:\$NODE_PORT/api/v1/casts/docs"
+                '''
                 }
             }
 
@@ -214,6 +232,7 @@ stage('Deploiement en staging'){
 
                 script {
                 sh '''
+                #!/bin/bash
                 rm -Rf .kube
                 mkdir .kube
                 ls
@@ -221,20 +240,30 @@ stage('Deploiement en staging'){
                 cp helm/values.yaml values.yml
                 cat values.yml
                 sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
-                helm upgrade --install moviecast-helm ./helm \
-        --namespace prod --create-namespace \
-        --values ./helm/values.yaml \
-        --set namespace=prod \
-        --set cast_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE}:${DOCKER_TAG} \
-        --set movie_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE}:${DOCKER_TAG}
+                RELEASE_NAME="moviecast-helm"
+                NAMESPACE="prod"
+                helm upgrade $RELEASE_NAME ./helm \
+                    --namespace $NAMESPACE \
+                    --values ./helm/values.yaml \
+                    --set namespace=$NAMESPACE \
+                    --set cast_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE}:${DOCKER_TAG} \
+                    --set movie_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE}:${DOCKER_TAG} \
+                    --set releaseVersion=${DOCKER_TAG} \
+                || \
+                helm install $RELEASE_NAME ./helm \
+                    --namespace $NAMESPACE --create-namespace \
+                    --values ./helm/values.yaml \
+                    --set namespace=$NAMESPACE \
+                    --set cast_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE}:${DOCKER_TAG} \
+                    --set movie_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE}:${DOCKER_TAG} \
+                    --set releaseVersion=${DOCKER_TAG}
+                echo "Waiting for Nginx service in $NAMESPACE to be ready..."
+                sleep 15
 
-    echo "Waiting for Nginx service in prod to be ready..."
-       sleep 15
-
-    IP=\$(curl ifconfig.me)
-    NODE_PORT=\$(kubectl get svc nginx -n prod -o jsonpath='{.spec.ports[0].nodePort}')
-    echo "Movies API endpoint: http://\$IP:\$NODE_PORT/api/v1/movies/docs"
-    echo "Casts API endpoint: http://\$IP:\$NODE_PORT/api/v1/casts/docs"
+                IP=\$(curl ifconfig.me)
+                NODE_PORT=\$(kubectl get svc nginx -n $NAMESPACE -o jsonpath='{.spec.ports[0].nodePort}')
+                echo "Movies API endpoint: http://\$IP:\$NODE_PORT/api/v1/movies/docs"
+                echo "Casts API endpoint: http://\$IP:\$NODE_PORT/api/v1/casts/docs"
                 '''
                 }
             }
