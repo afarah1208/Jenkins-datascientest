@@ -120,8 +120,8 @@ def deployWithHelm(env) {
     #!/bin/bash
     rm -Rf .kube
     mkdir .kube
-    echo "\$KUBECONFIG" > .kube/config
-
+    ls
+    cat $KUBECONFIG > .kube/config
     helm upgrade --install moviecast-helm ./helm \
         --namespace ${env} --create-namespace \
         --values ./helm/values.yaml \
