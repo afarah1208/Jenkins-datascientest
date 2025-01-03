@@ -109,9 +109,8 @@ stage('Deploiement en dev'){
     sleep 15
 
     NODE_PORT=\$(kubectl get svc nginx -n dev -o jsonpath='{.spec.ports[0].nodePort}')
-    echo "Nginx is accessible on: http://NODE_IP:\$NODE_PORT"
-    echo "Movies API endpoint: http://NODE_IP:\$NODE_PORT/api/v1/movies/"
-    echo "Casts API endpoint: http://NODE_IP:\$NODE_PORT/api/v1/casts/"
+    echo "Movies API endpoint: http://NODE_IP:\$NODE_PORT/api/v1/movies/docs"
+    echo "Casts API endpoint: http://NODE_IP:\$NODE_PORT/api/v1/casts/docs"
     '''
                 }
             }
@@ -136,18 +135,16 @@ stage('Deploiement en qa'){
         --namespace qa --create-namespace \
         --values ./helm/values.yaml \
         --set namespace=qa \
-        --set cast_service.image=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE} \
-        --set cast_service.imageTag=${DOCKER_TAG} \
-        --set movie_service.image=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE} \
-        --set movie_service.imageTag=${DOCKER_TAG}
+        --set cast_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE}:${DOCKER_TAG} \
+        --set movie_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE}:${DOCKER_TAG}
 
     echo "Waiting for Nginx service in qa to be ready..."
         sleep 15
 
     NODE_PORT=\$(kubectl get svc nginx -n qa -o jsonpath='{.spec.ports[0].nodePort}')
-    echo "Nginx is accessible on: http://NODE_IP:\$NODE_PORT"
-    echo "Movies API endpoint: http://NODE_IP:\$NODE_PORT/api/v1/movies/"
-    echo "Casts API endpoint: http://NODE_IP:\$NODE_PORT/api/v1/casts/"'''
+    IP=\$(curl ifconfig.me)
+    echo "Movies API endpoint: http://\$IP:\$NODE_PORT/api/v1/movies/docs"
+    echo "Casts API endpoint: http://\$IP:\$NODE_PORT/api/v1/casts/docs"'''
                 }
             }
 
@@ -171,18 +168,15 @@ stage('Deploiement en staging'){
         --namespace staging --create-namespace \
         --values ./helm/values.yaml \
         --set namespace=staging \
-        --set cast_service.image=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE} \
-        --set cast_service.imageTag=${DOCKER_TAG} \
-        --set movie_service.image=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE} \
-        --set movie_service.imageTag=${DOCKER_TAG}
+        --set cast_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE}:${DOCKER_TAG} \
+        --set movie_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE}:${DOCKER_TAG}
 
     echo "Waiting for Nginx service in staging to be ready..."
         sleep 15
 
     NODE_PORT=\$(kubectl get svc nginx -n staging -o jsonpath='{.spec.ports[0].nodePort}')
-    echo "Nginx is accessible on: http://NODE_IP:\$NODE_PORT"
-    echo "Movies API endpoint: http://NODE_IP:\$NODE_PORT/api/v1/movies/"
-    echo "Casts API endpoint: http://NODE_IP:\$NODE_PORT/api/v1/casts/"'''
+    echo "Movies API endpoint: http://NODE_IP:\$NODE_PORT/api/v1/movies/docs"
+    echo "Casts API endpoint: http://NODE_IP:\$NODE_PORT/api/v1/casts/docs"'''
                 }
             }
 
@@ -212,18 +206,16 @@ stage('Deploiement en staging'){
         --namespace prod --create-namespace \
         --values ./helm/values.yaml \
         --set namespace=prod \
-        --set cast_service.image=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE} \
-        --set cast_service.imageTag=${DOCKER_TAG} \
-        --set movie_service.image=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE} \
-        --set movie_service.imageTag=${DOCKER_TAG}
+        --set cast_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE}:${DOCKER_TAG} \
+        --set movie_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE}:${DOCKER_TAG}
 
     echo "Waiting for Nginx service in prod to be ready..."
        sleep 15
 
+    
     NODE_PORT=\$(kubectl get svc nginx -n prod -o jsonpath='{.spec.ports[0].nodePort}')
-    echo "Nginx is accessible on: http://NODE_IP:\$NODE_PORT"
-    echo "Movies API endpoint: http://NODE_IP:\$NODE_PORT/api/v1/movies/"
-    echo "Casts API endpoint: http://NODE_IP:\$NODE_PORT/api/v1/casts/"
+    echo "Movies API endpoint: http://NODE_IP:\$NODE_PORT/api/v1/movies/docs"
+    echo "Casts API endpoint: http://NODE_IP:\$NODE_PORT/api/v1/casts/docs"
                 '''
                 }
             }
