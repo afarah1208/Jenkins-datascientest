@@ -138,7 +138,6 @@ pipeline {
         }
     }
 }
-
 def deployWithHelm(env) {
     environment {
         KUBECONFIG = credentials("config")
@@ -147,25 +146,25 @@ def deployWithHelm(env) {
     #!/bin/bash
     rm -Rf .kube
     mkdir .kube
-    echo "$KUBECONFIG" > .kube/config
+    echo "\$KUBECONFIG" > .kube/config
 
     helm upgrade --install moviecast-helm ./helm \
         --namespace ${env} --create-namespace \
         --values ./helm/values.yaml \
         --set namespace=${env} \
-        --set cast_service.image=$DOCKER_ID/$DOCKER_IMAGE_CAST_SERVICE \
-        --set cast_service.imageTag=$DOCKER_TAG \
-        --set movie_service.image=$DOCKER_ID/$DOCKER_IMAGE_MOVIE_SERVICE \
-        --set movie_service.imageTag=$DOCKER_TAG
+        --set cast_service.image=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE} \
+        --set cast_service.imageTag=${DOCKER_TAG} \
+        --set movie_service.image=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE} \
+        --set movie_service.imageTag=${DOCKER_TAG}
 
     echo "Waiting for Nginx service in ${env} to be ready..."
     sleep 30
 
-    NODE_PORT=$(kubectl get svc nginx-service -n ${env} -o jsonpath='{.spec.ports[0].nodePort}')
-    NODE_IP=$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}')
+    NODE_PORT=\$(kubectl get svc nginx-service -n ${env} -o jsonpath='{.spec.ports[0].nodePort}')
+    NODE_IP=\$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}')
 
-    echo "Nginx is accessible on: http://$NODE_IP:$NODE_PORT"
-    echo "Movies API endpoint: http://$NODE_IP:$NODE_PORT/api/v1/movies/"
-    echo "Casts API endpoint: http://$NODE_IP:$NODE_PORT/api/v1/casts/"
+    echo "Nginx is accessible on: http://\$NODE_IP:\$NODE_PORT"
+    echo "Movies API endpoint: http://\$NODE_IP:\$NODE_PORT/api/v1/movies/"
+    echo "Casts API endpoint: http://\$NODE_IP:\$NODE_PORT/api/v1/casts/"
     """
 }
