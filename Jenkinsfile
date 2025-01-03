@@ -149,21 +149,24 @@ stage('Deploiement en qa'){
                 sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
                 RELEASE_NAME="moviecast-helm"
                 NAMESPACE="qa"
-                helm upgrade $RELEASE_NAME ./helm \
-                    --namespace $NAMESPACE \
-                    --values ./helm/values.yaml \
-                    --set namespace=$NAMESPACE \
-                    --set cast_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE}:${DOCKER_TAG} \
-                    --set movie_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE}:${DOCKER_TAG} \
-                    --set releaseVersion=${DOCKER_TAG} \
-                || \
-                helm install $RELEASE_NAME ./helm \
-                    --namespace $NAMESPACE --create-namespace \
-                    --values ./helm/values.yaml \
-                    --set namespace=$NAMESPACE \
-                    --set cast_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE}:${DOCKER_TAG} \
-                    --set movie_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE}:${DOCKER_TAG} \
-                    --set releaseVersion=${DOCKER_TAG}
+                if helm status $RELEASE_NAME -n $NAMESPACE > /dev/null 2>&1; then \
+                    helm upgrade $RELEASE_NAME ./helm \
+                        --namespace $NAMESPACE \
+                        --values ./helm/values.yaml \
+                        --set namespace=$NAMESPACE \
+                        --set cast_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE}:${DOCKER_TAG} \
+                        --set movie_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE}:${DOCKER_TAG} \
+                        --set releaseVersion=${BUILD_ID}; \
+                else \
+                    helm install $RELEASE_NAME ./helm \
+                        --namespace $NAMESPACE --create-namespace \
+                        --values ./helm/values.yaml \
+                        --set namespace=$NAMESPACE \
+                        --set cast_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE}:${DOCKER_TAG} \
+                        --set movie_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE}:${DOCKER_TAG} \
+                        --set releaseVersion=${BUILD_ID}; \
+                fi
+
                 echo "Waiting for Nginx service in $NAMESPACE to be ready..."
                 sleep 15
 
@@ -184,7 +187,7 @@ stage('Deploiement en staging'){
             steps {
                 script {
                 sh '''
-                 #!/bin/bash
+                #!/bin/bash
                 rm -Rf .kube
                 mkdir .kube
                 ls
@@ -194,21 +197,24 @@ stage('Deploiement en staging'){
                 sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
                 RELEASE_NAME="moviecast-helm"
                 NAMESPACE="staging"
-                helm upgrade $RELEASE_NAME ./helm \
-                    --namespace $NAMESPACE \
-                    --values ./helm/values.yaml \
-                    --set namespace=$NAMESPACE \
-                    --set cast_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE}:${DOCKER_TAG} \
-                    --set movie_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE}:${DOCKER_TAG} \
-                    --set releaseVersion=${DOCKER_TAG} \
-                || \
-                helm install $RELEASE_NAME ./helm \
-                    --namespace $NAMESPACE --create-namespace \
-                    --values ./helm/values.yaml \
-                    --set namespace=$NAMESPACE \
-                    --set cast_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE}:${DOCKER_TAG} \
-                    --set movie_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE}:${DOCKER_TAG} \
-                    --set releaseVersion=${DOCKER_TAG}
+                if helm status $RELEASE_NAME -n $NAMESPACE > /dev/null 2>&1; then \
+                    helm upgrade $RELEASE_NAME ./helm \
+                        --namespace $NAMESPACE \
+                        --values ./helm/values.yaml \
+                        --set namespace=$NAMESPACE \
+                        --set cast_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE}:${DOCKER_TAG} \
+                        --set movie_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE}:${DOCKER_TAG} \
+                        --set releaseVersion=${BUILD_ID}; \
+                else \
+                    helm install $RELEASE_NAME ./helm \
+                        --namespace $NAMESPACE --create-namespace \
+                        --values ./helm/values.yaml \
+                        --set namespace=$NAMESPACE \
+                        --set cast_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE}:${DOCKER_TAG} \
+                        --set movie_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE}:${DOCKER_TAG} \
+                        --set releaseVersion=${BUILD_ID}; \
+                fi
+
                 echo "Waiting for Nginx service in $NAMESPACE to be ready..."
                 sleep 15
 
@@ -245,21 +251,24 @@ stage('Deploiement en staging'){
                 sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
                 RELEASE_NAME="moviecast-helm"
                 NAMESPACE="prod"
-                helm upgrade $RELEASE_NAME ./helm \
-                    --namespace $NAMESPACE \
-                    --values ./helm/values.yaml \
-                    --set namespace=$NAMESPACE \
-                    --set cast_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE}:${DOCKER_TAG} \
-                    --set movie_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE}:${DOCKER_TAG} \
-                    --set releaseVersion=${DOCKER_TAG} \
-                || \
-                helm install $RELEASE_NAME ./helm \
-                    --namespace $NAMESPACE --create-namespace \
-                    --values ./helm/values.yaml \
-                    --set namespace=$NAMESPACE \
-                    --set cast_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE}:${DOCKER_TAG} \
-                    --set movie_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE}:${DOCKER_TAG} \
-                    --set releaseVersion=${DOCKER_TAG}
+                if helm status $RELEASE_NAME -n $NAMESPACE > /dev/null 2>&1; then \
+                    helm upgrade $RELEASE_NAME ./helm \
+                        --namespace $NAMESPACE \
+                        --values ./helm/values.yaml \
+                        --set namespace=$NAMESPACE \
+                        --set cast_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE}:${DOCKER_TAG} \
+                        --set movie_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE}:${DOCKER_TAG} \
+                        --set releaseVersion=${BUILD_ID}; \
+                else \
+                    helm install $RELEASE_NAME ./helm \
+                        --namespace $NAMESPACE --create-namespace \
+                        --values ./helm/values.yaml \
+                        --set namespace=$NAMESPACE \
+                        --set cast_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE}:${DOCKER_TAG} \
+                        --set movie_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE}:${DOCKER_TAG} \
+                        --set releaseVersion=${BUILD_ID}; \
+                fi
+
                 echo "Waiting for Nginx service in $NAMESPACE to be ready..."
                 sleep 15
 
