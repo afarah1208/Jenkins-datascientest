@@ -1,5 +1,5 @@
 namespace: dev
-releaseVersion : 0.0.1
+releaseVersion : 1.0
 cast_service:
   image:
     repository: afarah1208/cast-service:latest
