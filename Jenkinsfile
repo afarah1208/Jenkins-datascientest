@@ -95,7 +95,7 @@ stage('Deploiement en dev'){
                 mkdir .kube
                 ls
                 cat $KUBECONFIG > .kube/config
-                cp fastapi/values.yaml values.yml
+                cp helm/values.yaml values.yml
                 cat values.yml
                 sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
                 helm upgrade --install moviecast-helm ./helm \
@@ -132,7 +132,7 @@ stage('Deploiement en staging'){
                 mkdir .kube
                 ls
                 cat $KUBECONFIG > .kube/config
-                cp fastapi/values.yaml values.yml
+                cp helm/values.yaml values.yml
                 cat values.yml
                 sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
                 helm upgrade --install moviecast-helm ./helm \
@@ -175,7 +175,7 @@ stage('Deploiement en staging'){
                 mkdir .kube
                 ls
                 cat $KUBECONFIG > .kube/config
-                cp fastapi/values.yaml values.yml
+                cp helm/values.yaml values.yml
                 cat values.yml
                 sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
                 helm upgrade --install moviecast-helm ./helm \
@@ -203,34 +203,4 @@ stage('Deploiement en staging'){
         }
 
 }
-}
-def deployWithHelm(env) {
-    environment {
-        KUBECONFIG = credentials("config")
-    }
-    sh """
-    #!/bin/bash
-    rm -Rf .kube
-    mkdir .kube
-    ls
-    cat $KUBECONFIG > .kube/config
-    helm upgrade --install moviecast-helm ./helm \
-        --namespace ${env} --create-namespace \
-        --values ./helm/values.yaml \
-        --set namespace=${env} \
-        --set cast_service.image=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE} \
-        --set cast_service.imageTag=${DOCKER_TAG} \
-        --set movie_service.image=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE} \
-        --set movie_service.imageTag=${DOCKER_TAG}
-
-    echo "Waiting for Nginx service in ${env} to be ready..."
-    sleep 30
-
-    NODE_PORT=\$(kubectl get svc nginx-service -n ${env} -o jsonpath='{.spec.ports[0].nodePort}')
-    NODE_IP=\$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}')
-
-    echo "Nginx is accessible on: http://\$NODE_IP:\$NODE_PORT"
-    echo "Movies API endpoint: http://\$NODE_IP:\$NODE_PORT/api/v1/movies/"
-    echo "Casts API endpoint: http://\$NODE_IP:\$NODE_PORT/api/v1/casts/"
-    """
 }
