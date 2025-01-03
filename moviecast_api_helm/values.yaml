@@ -1,6 +1,5 @@
 namespace: dev
-releaseVersion : 1.0
-
+releaseVersion: 1.0
 cast_service:
   image:
     repository: afarah1208/cast-service:latest
@@ -70,7 +69,7 @@ cast_db:
 
 movie_service:
   image:
-    repository: afarah1208/movie-service:latest
+    repository: afarah1208/cast-service:latest
     pullPolicy: IfNotPresent
   metadata:
     label: movie-service
