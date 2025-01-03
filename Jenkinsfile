@@ -102,10 +102,8 @@ stage('Deploiement en dev'){
         --namespace dev --create-namespace \
         --values ./helm/values.yaml \
         --set namespace=dev \
-        --set cast_service.image=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE} \
-        --set cast_service.imageTag=${DOCKER_TAG} \
-        --set movie_service.image=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE} \
-        --set movie_service.imageTag=${DOCKER_TAG}
+        --set cast_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE}:${DOCKER_TAG} \
+        --set movie_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE}:${DOCKER_TAG}
 
     echo "Waiting for Nginx service in dev to be ready..."
     sleep 30
