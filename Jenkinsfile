@@ -98,8 +98,9 @@ stage('Deploiement en dev'){
                 cat $KUBECONFIG > .kube/config
                 cp helm/values.yaml values.yml
                 cat values.yml
+                sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
                 RELEASE_NAME="moviecast-helm"
-                    NAMESPACE="prod"
+                    NAMESPACE="dev"
 
                     helm status $RELEASE_NAME -n $NAMESPACE > /dev/null 2>&1
 
