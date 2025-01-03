@@ -101,6 +101,7 @@ stage('Deploiement en dev'){
                 sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
                 RELEASE_NAME="moviecast-helm"
                 NAMESPACE="dev"
+                helm status $RELEASE_NAME -n $NAMESPACE > /dev/null 2>&1 && \
                 helm upgrade $RELEASE_NAME ./helm \
                     --namespace $NAMESPACE \
                     --values ./helm/values.yaml \
