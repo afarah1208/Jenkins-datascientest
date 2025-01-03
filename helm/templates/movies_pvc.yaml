@@ -4,8 +4,9 @@ metadata:
   name: {{ .Values.movie_service.pvc.name }}
   namespace: {{ .Values.namespace }}
 spec:
+  storageClassName: {{ .Values.movie_service.pvc.storageClassName }}
   accessModes:
-    - {{ .Values.cast_movie.pvc.accessMode }}
+    - {{ .Values.movie_service.pvc.accessMode }}
   resources:
     requests:
-      storage: {{ .Values.cast_movie.pvc.storage }}
+      storage: {{ .Values.movie_service.pvc.storage }}
