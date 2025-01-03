@@ -108,9 +108,10 @@ stage('Deploiement en dev'){
     echo "Waiting for Nginx service in dev to be ready..."
     sleep 15
 
+    IP=\$(curl ifconfig.me)
     NODE_PORT=\$(kubectl get svc nginx -n dev -o jsonpath='{.spec.ports[0].nodePort}')
-    echo "Movies API endpoint: http://NODE_IP:\$NODE_PORT/api/v1/movies/docs"
-    echo "Casts API endpoint: http://NODE_IP:\$NODE_PORT/api/v1/casts/docs"
+    echo "Movies API endpoint: http://\$IP:\$NODE_PORT/api/v1/movies/docs"
+    echo "Casts API endpoint: http://\$IP:\$NODE_PORT/api/v1/casts/docs"
     '''
                 }
             }
@@ -174,9 +175,10 @@ stage('Deploiement en staging'){
     echo "Waiting for Nginx service in staging to be ready..."
         sleep 15
 
+    IP=\$(curl ifconfig.me)
     NODE_PORT=\$(kubectl get svc nginx -n staging -o jsonpath='{.spec.ports[0].nodePort}')
-    echo "Movies API endpoint: http://NODE_IP:\$NODE_PORT/api/v1/movies/docs"
-    echo "Casts API endpoint: http://NODE_IP:\$NODE_PORT/api/v1/casts/docs"'''
+    echo "Movies API endpoint: http://\$IP:\$NODE_PORT/api/v1/movies/docs"
+    echo "Casts API endpoint: http://\$IP:\$NODE_PORT/api/v1/casts/docs"'''
                 }
             }
 
@@ -212,10 +214,10 @@ stage('Deploiement en staging'){
     echo "Waiting for Nginx service in prod to be ready..."
        sleep 15
 
-    
+    IP=\$(curl ifconfig.me)
     NODE_PORT=\$(kubectl get svc nginx -n prod -o jsonpath='{.spec.ports[0].nodePort}')
-    echo "Movies API endpoint: http://NODE_IP:\$NODE_PORT/api/v1/movies/docs"
-    echo "Casts API endpoint: http://NODE_IP:\$NODE_PORT/api/v1/casts/docs"
+    echo "Movies API endpoint: http://\$IP:\$NODE_PORT/api/v1/movies/docs"
+    echo "Casts API endpoint: http://\$IP:\$NODE_PORT/api/v1/casts/docs"
                 '''
                 }
             }
