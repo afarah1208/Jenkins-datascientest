@@ -108,7 +108,7 @@ stage('Deploiement en dev'){
                     --set namespace=$NAMESPACE \
                     --set cast_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE}:${DOCKER_TAG} \
                     --set movie_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE}:${DOCKER_TAG} \
-                    --set releaseVersion=${DOCKER_TAG}; \
+                    --set releaseVersion=${BUILD_ID}; \
             else \
                 helm install $RELEASE_NAME ./helm \
                     --namespace $NAMESPACE --create-namespace \
@@ -116,7 +116,7 @@ stage('Deploiement en dev'){
                     --set namespace=$NAMESPACE \
                     --set cast_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE}:${DOCKER_TAG} \
                     --set movie_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE}:${DOCKER_TAG} \
-                    --set releaseVersion=${DOCKER_TAG}; \
+                    --set releaseVersion=${BUILD_ID}; \
             fi
 
                 echo "Waiting for Nginx service in $NAMESPACE to be ready..."
