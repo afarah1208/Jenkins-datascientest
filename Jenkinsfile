@@ -57,79 +57,94 @@ pipeline {
             }
         }
 
-        stage('Deploy to Dev') {
+        stage('Deploiement en dev'){
+        environment
+        {
+        KUBECONFIG = credentials("config")
+        }
             steps {
                 script {
-                    sh '''
-                        rm -Rf .kube
-                        mkdir .kube
-                        cat $KUBECONFIG > .kube/config
-                        cp castmovie/values-dev.yaml values.yml
-                        #sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
-                        helm upgrade --install my-app ./castmovie --values=values.yml --namespace dev
-                    '''
+                sh '''
+                rm -Rf .kube
+                mkdir .kube
+                ls
+                cat $KUBECONFIG > .kube/config
+                cp moviecast_api_helm/values.yaml values.yml
+                cat values.yml
+                helm upgrade --install moviecast-api moviecast_api_helm --values=values.yml --namespace dev
+                '''
                 }
             }
-        }
-        stage('Deploy to QA') {
-            steps {
-                script {
-                    sh '''
-                        rm -Rf .kube
-                        mkdir .kube
-                        cat $KUBECONFIG > .kube/config
-                        cp castmovie/values-qa.yaml values.yml
-                        #sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
-                        helm upgrade --install my-app ./castmovie --values=values.yml --namespace qa
-                    '''
-                }
-            }
-        }
 
- 
-        stage('Deploy to Staging') {
+        }
+stage('Deploiement en qa'){
+        environment
+        {
+        KUBECONFIG = credentials("config")
+        }
             steps {
                 script {
-                    sh '''
-                        rm -Rf .kube
-                        mkdir .kube
-                        cat $KUBECONFIG > .kube/config
-                        cp castmovie/values-staging.yaml values.yml
-                        echo "Fichier values.yml avant modification:"
-			cat values.yml
-			#sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
- 			echo "Fichier values.yml après modification:"
-			cat values.yml 
-                        helm upgrade --install app ./castmovie --values=values.yml --namespace staging
-                    '''
+                sh '''
+                rm -Rf .kube
+                mkdir .kube
+                ls
+                cat $KUBECONFIG > .kube/config
+                cp moviecast_api_helm/values.yaml values.yml
+                cat values.yml
+                helm upgrade --install moviecast-api moviecast_api_helm --values=values.yml --namespace qa
+                '''
                 }
             }
-        }
 
-        stage('Deploy to Prod') {
+        }
+stage('Deploiement en staging'){
+        environment
+        {
+        KUBECONFIG = credentials("config")
+        }
             steps {
-                // Create an Approval Button with a timeout of 15 minutes.
+                script {
+                sh '''
+                rm -Rf .kube
+                mkdir .kube
+                ls
+                cat $KUBECONFIG > .kube/config
+                cp moviecast_api_helm/values.yaml values.yml
+                cat values.yml
+                helm upgrade --install moviecast-api moviecast_api_helm --values=values.yml --namespace staging
+                '''
+                }
+            }
+
+        }
+stage('Deploiement en prod'){
+        environment
+        {
+          KUBECONFIG = credentials("config")
+        }
+        when {
+          expression {
+            return BRANCH_NAME ==~ /(origin\/main|origin\/master)/
+          }
+        }
+            steps {
                 timeout(time: 15, unit: "MINUTES") {
-                    input message: 'Do you want to deploy in production?', ok: 'Yes'
+                  input message: 'Do you want to deploy in production ?', ok: 'Yes'
                 }
                 script {
-                    sh '''
-                        rm -Rf .kube
-                        mkdir .kube
-                        cat $KUBECONFIG > .kube/config
-                        cp castmovie/values-prod.yaml values.yml
-                        #sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
-                        helm upgrade --install app ./castmovie --values=values.yml --namespace prod
-                    '''
+                sh '''
+                rm -Rf .kube
+                mkdir .kube
+                ls
+                cat $KUBECONFIG > .kube/config
+                cp moviecast_api_helm/values.yaml values.yml
+                cat values.yml
+                helm upgrade --install moviecast-api moviecast_api_helm --values=values.yml --namespace prod
+                '''
                 }
             }
-        }
-    }
 
-    post {
-        always {
-            cleanWs()
         }
-    }
+
 }
-
+}
