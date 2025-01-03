@@ -101,22 +101,24 @@ stage('Deploiement en dev'){
                 sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
                 RELEASE_NAME="moviecast-helm"
                 NAMESPACE="dev"
-                helm status $RELEASE_NAME -n $NAMESPACE > /dev/null 2>&1 && \
+                if helm status $RELEASE_NAME -n $NAMESPACE > /dev/null 2>&1; then \
                 helm upgrade $RELEASE_NAME ./helm \
                     --namespace $NAMESPACE \
                     --values ./helm/values.yaml \
                     --set namespace=$NAMESPACE \
                     --set cast_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE}:${DOCKER_TAG} \
                     --set movie_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE}:${DOCKER_TAG} \
-                    --set releaseVersion=${DOCKER_TAG} \
-                || \
+                    --set releaseVersion=${DOCKER_TAG}; \
+            else \
                 helm install $RELEASE_NAME ./helm \
                     --namespace $NAMESPACE --create-namespace \
                     --values ./helm/values.yaml \
                     --set namespace=$NAMESPACE \
                     --set cast_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE}:${DOCKER_TAG} \
                     --set movie_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE}:${DOCKER_TAG} \
-                    --set releaseVersion=${DOCKER_TAG}
+                    --set releaseVersion=${DOCKER_TAG}; \
+            fi
+
                 echo "Waiting for Nginx service in $NAMESPACE to be ready..."
                 sleep 15
 
