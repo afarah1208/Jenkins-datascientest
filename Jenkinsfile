@@ -106,14 +106,48 @@ stage('Deploiement en dev'){
         --set movie_service.image.repository=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE}:${DOCKER_TAG}
 
     echo "Waiting for Nginx service in dev to be ready..."
-    sleep 30
+    sleep 15
 
-    NODE_PORT=\$(kubectl get svc nginx-service -n dev -o jsonpath='{.spec.ports[0].nodePort}')
-    NODE_IP=\$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}')
+    NODE_PORT=\$(kubectl get svc nginx -n dev -o jsonpath='{.spec.ports[0].nodePort}')
+    echo "Nginx is accessible on: http://NODE_IP:\$NODE_PORT"
+    echo "Movies API endpoint: http://NODE_IP:\$NODE_PORT/api/v1/movies/"
+    echo "Casts API endpoint: http://NODE_IP:\$NODE_PORT/api/v1/casts/"
+    '''
+                }
+            }
 
-    echo "Nginx is accessible on: http://\$NODE_IP:\$NODE_PORT"
-    echo "Movies API endpoint: http://\$NODE_IP:\$NODE_PORT/api/v1/movies/"
-    echo "Casts API endpoint: http://\$NODE_IP:\$NODE_PORT/api/v1/casts/"'''
+        }
+stage('Deploiement en qa'){
+        environment
+        {
+        KUBECONFIG = credentials("config") // we retrieve  kubeconfig from secret file called config saved on jenkins
+        }
+            steps {
+                script {
+                sh '''
+                rm -Rf .kube
+                mkdir .kube
+                ls
+                cat $KUBECONFIG > .kube/config
+                cp helm/values.yaml values.yml
+                cat values.yml
+                sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
+                helm upgrade --install moviecast-helm ./helm \
+        --namespace qa --create-namespace \
+        --values ./helm/values.yaml \
+        --set namespace=qa \
+        --set cast_service.image=${DOCKER_ID}/${DOCKER_IMAGE_CAST_SERVICE} \
+        --set cast_service.imageTag=${DOCKER_TAG} \
+        --set movie_service.image=${DOCKER_ID}/${DOCKER_IMAGE_MOVIE_SERVICE} \
+        --set movie_service.imageTag=${DOCKER_TAG}
+
+    echo "Waiting for Nginx service in qa to be ready..."
+        sleep 15
+
+    NODE_PORT=\$(kubectl get svc nginx -n qa -o jsonpath='{.spec.ports[0].nodePort}')
+    echo "Nginx is accessible on: http://NODE_IP:\$NODE_PORT"
+    echo "Movies API endpoint: http://NODE_IP:\$NODE_PORT/api/v1/movies/"
+    echo "Casts API endpoint: http://NODE_IP:\$NODE_PORT/api/v1/casts/"'''
                 }
             }
 
@@ -143,14 +177,12 @@ stage('Deploiement en staging'){
         --set movie_service.imageTag=${DOCKER_TAG}
 
     echo "Waiting for Nginx service in staging to be ready..."
-    sleep 30
+        sleep 15
 
-    NODE_PORT=\$(kubectl get svc nginx-service -n staging -o jsonpath='{.spec.ports[0].nodePort}')
-    NODE_IP=\$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}')
-
-    echo "Nginx is accessible on: http://\$NODE_IP:\$NODE_PORT"
-    echo "Movies API endpoint: http://\$NODE_IP:\$NODE_PORT/api/v1/movies/"
-    echo "Casts API endpoint: http://\$NODE_IP:\$NODE_PORT/api/v1/casts/" '''
+    NODE_PORT=\$(kubectl get svc nginx -n staging -o jsonpath='{.spec.ports[0].nodePort}')
+    echo "Nginx is accessible on: http://NODE_IP:\$NODE_PORT"
+    echo "Movies API endpoint: http://NODE_IP:\$NODE_PORT/api/v1/movies/"
+    echo "Casts API endpoint: http://NODE_IP:\$NODE_PORT/api/v1/casts/"'''
                 }
             }
 
@@ -186,14 +218,12 @@ stage('Deploiement en staging'){
         --set movie_service.imageTag=${DOCKER_TAG}
 
     echo "Waiting for Nginx service in prod to be ready..."
-    sleep 30
+       sleep 15
 
-    NODE_PORT=\$(kubectl get svc nginx-service -n prod -o jsonpath='{.spec.ports[0].nodePort}')
-    NODE_IP=\$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}')
-
-    echo "Nginx is accessible on: http://\$NODE_IP:\$NODE_PORT"
-    echo "Movies API endpoint: http://\$NODE_IP:\$NODE_PORT/api/v1/movies/"
-    echo "Casts API endpoint: http://\$NODE_IP:\$NODE_PORT/api/v1/casts/"
+    NODE_PORT=\$(kubectl get svc nginx -n prod -o jsonpath='{.spec.ports[0].nodePort}')
+    echo "Nginx is accessible on: http://NODE_IP:\$NODE_PORT"
+    echo "Movies API endpoint: http://NODE_IP:\$NODE_PORT/api/v1/movies/"
+    echo "Casts API endpoint: http://NODE_IP:\$NODE_PORT/api/v1/casts/"
                 '''
                 }
             }
